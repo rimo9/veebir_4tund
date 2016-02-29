@@ -10,12 +10,13 @@
 
     this.routes = Moosipurk.routes;
 
-    console.log(this);
+    //console.log(this);
     //console.log('moosipurgi sees');
 
     //Kõik muutujad, mis on üldised ja muudetavad
     this.currentRoute = null; // hoiab meeles mis lehel hetkel on
     this.interval = null;
+    this.jars = []; //kõik purgid tulevad siia sisse
 
     //panen rakenduse tööle
     this.init();
@@ -42,7 +43,7 @@
     },
     "manage-view" : {
       render: function(){
-        console.log('JS haldus lehel');
+        //console.log('JS haldus lehel');
       }
     }
   };
@@ -50,17 +51,29 @@
   //kõik moosipurgi funktsioonid siia sisse
   Moosipurk.prototype = {
     init: function(){
-      console.log('rakendus käivitus');
+      //console.log('rakendus käivitus');
       //Esialgne loogika tuleb siia
       window.addEventListener('hashchange', this.routeChange.bind(this));
       //vaatan mis lehel olen
-      console.log(window.location.hash);
+      //console.log(window.location.hash);
       if(!window.location.hash){
         window.location.hash = "home-view";
       }else{
         //hash oli olemas
         this.routeChange();
       }
+      //saan kätte purgid localStorage kui on
+      if(localStorage.jars){
+        //string tagasi objektiks
+        this.jars = JSON.parse(localStorage.jars);
+        //tekitan loendi htmli
+        this.jars.forEach(function(jar){
+            var new_jar = new Jar(jar.title, jar.ingredients, jar.timeAdded);
+            var li = new_jar.createHtmlElement();
+            document.querySelector('.list-of-jars').appendChild(li);
+        });
+      }
+
       //hakka kuulama hiireklõpse
       this.bindMouseEvents();
     },
@@ -71,21 +84,28 @@
       //lisa uus purk
       var title = this.trimWord(document.querySelector('.title').value);
       var ingredients = this.trimWord(document.querySelector('.ingredients').value);
-	  var timeAdded = this.writeDate();
-      console.log(title+' '+ingredients+' Lisatud: '+timeAdded);
-	  var className = document.getElementById("show-feedback").className;
-	  
+	    var timeAdded = this.writeDate();
+      //console.log(title+' '+ingredients+' Lisatud: '+timeAdded);
+	    var className = document.getElementById("show-feedback").className;
+      //lisan masiivi purgid
+
+
       if(title === '' || ingredients === ''){
-		if(className == "feedback-success"){
-		document.querySelector('.feedback-success').className=document.querySelector('.feedback-success').className.replace('feedback-success','feedback-error');
-		}
-        document.querySelector('#show-feedback').innerHTML='Kõik read peavad täidetud olema';
+  		    if(className == "feedback-success"){
+  		        document.querySelector('.feedback-success').className=document.querySelector('.feedback-success').className.replace('feedback-success','feedback-error');
+  		    }
+          document.querySelector('#show-feedback').innerHTML='Kõik read peavad täidetud olema';
       }else{
         if(className == "feedback-error"){
           document.querySelector('.feedback-error').className=document.querySelector('.feedback-error').className.replace('feedback-error','feedback-success');
         }
         document.querySelector('#show-feedback').innerHTML='Salvestamine õnnestus';
-		var new_jar = new Jar(title, ingredients, timeAdded);
+  		  var new_jar = new Jar(title, ingredients, timeAdded);
+        //lisan massiivi moosipurgi
+        this.jars.push(new_jar);
+        console.log(JSON.stringify(this.jars));
+        //JSON'i stringina salvestan local storagisse
+        localStorage.setItem('jars', JSON.stringify(this.jars));
         document.querySelector('.list-of-jars').appendChild(new_jar.createHtmlElement());
       }
     },
@@ -95,7 +115,7 @@
       if(this.routes[this.currentRoute]){
         //jah olemas
         this.updateMenu();
-        console.log('>>> '+this.currentRoute);
+        //console.log('>>> '+this.currentRoute);
         //käivitan selle lehe jaoks ettenähtud js
         this.routes[this.currentRoute].render();
       }else{
@@ -146,7 +166,7 @@
     createHtmlElement: function(){
       //anna tagasi ilus html
       var li = document.createElement('li');
-	  
+
       var span = document.createElement('span');
       span.className = 'letter';
       var letter = document.createTextNode(this.title.charAt(0));
@@ -159,7 +179,7 @@
       content_span.appendChild(content);
       li.appendChild(content_span);
 
-      console.log(li);
+      //console.log(li);
       return li;
     }
   };
