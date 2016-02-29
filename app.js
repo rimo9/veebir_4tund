@@ -75,10 +75,33 @@
       }
 
       //hakka kuulama hiireklõpse
-      this.bindMouseEvents();
+      this.bindEvents();
     },
-    bindMouseEvents: function(){
+    bindEvents: function(){
       document.querySelector('.add-new-jar').addEventListener('click', this.addNewClick.bind(this));
+      //kuulan trükkimist otsi kastist
+      document.querySelector('#search').addEventListener('keyup', this.search.bind(this));
+    },
+    search: function(event){
+      //otsikasti väärtus
+      var needle = document.querySelector('#search').value.toLowerCase();
+      //console.log(needle);
+
+      var list = document.querySelectorAll('ul.list-of-jars li');
+      console.log(list);
+      for(var i=0; i<list.length; i++){
+        var li = list[i];
+          //ühe list itemi sisu
+          var stack = li.querySelector('.content').innerHTML.toLowerCase();
+          //kas otsisõna on olemas
+          if(stack.indexOf(needle) !== -1){
+            //olemas
+            li.style.display = 'list-item';
+          }else{
+            //ei ole olemas
+            li.style.display = 'none';
+          }
+      }
     },
     addNewClick: function(event){
       //lisa uus purk
